@@ -22,13 +22,13 @@ class SpecDG:
     def __init__(self):
         """
         Read in the mapping file for all spectra
-      
+
         Returns
         -------
         (self.)plan:   Table
-            table containing the identification of each spectrum, 
+            table containing the identification of each spectrum,
             as well as its parameters
-           
+
             (self.)seds:   list
                 empty list to save the spectra if you want to
         """
@@ -36,17 +36,17 @@ class SpecDG:
         self.plan = Table.read(mapfile, format='ascii')
         self.seds = []
         #self.waves = []
-      
+
     def findFile(self,file_id):
        """
        Returns the full filename for a given GID from the spectrum mapping.
-      
+
        Parameter
        ---------
        file_id:   string
-          identification number of the spectrum to be read; 
+          identification number of the spectrum to be read;
           'gid' column of the self.plan Table
-      
+
        Returns
        -------
        filepath+filename:   string
@@ -78,68 +78,68 @@ class SpecDG:
 
     def findGidFromParam(self, grain, geom, sf_type, metal, age, sfr, tau):
         """
-        Returns the GID given a set of parameters 
+        Returns the GID given a set of parameters
         (If you want to plot or something)
-        
+
         Parameters
         ----------
         grain:   string
         type of grain
-        
+
         geom:   string
         geometry
-        
+
         sf_type: string
-        star formation type 
-        
+        star formation type
+
         metal:   float
         metallicity
-        
+
         age:   float
         age of the stellar population
-        
+
         sfr:   float
         star formation rate
-        
+
         tau:    float
         optical depth
-        
+
         Returns
         -------
         file_gid:   string
-        identification number of the spectrum with the given set 
+        identification number of the spectrum with the given set
         of parameters
         """
         # ToDo: A better way to do this?
-        ind = np.where( (self.plan['grain'] == grain) 
-                        & (self.plan['geom'] == geom) 
-                        & (self.plan['sf_type'] == sf_type) 
-                        & (self.plan['metal'] == metal) 
-                        & (self.plan['age'] == age) 
-                        & (self.plan['sfr'] == sfr) 
+        ind = np.where( (self.plan['grain'] == grain)
+                        & (self.plan['geom'] == geom)
+                        & (self.plan['sf_type'] == sf_type)
+                        & (self.plan['metal'] == metal)
+                        & (self.plan['age'] == age)
+                        & (self.plan['sfr'] == sfr)
                         & (self.plan['tau'] == tau) )
-        # Not all spectra available 
+        # Not all spectra available
         #  -- Exit if non existant - Until interpolation?
-        if len(ind[0]) == 0: 
+        if len(ind[0]) == 0:
             return
         # If valid, then go on
         file_gid = self.plan['gid'][ind[0][0]]
         return file_gid
-   
+
     def findParamsFromGid(self, thisgid):
         """
-        Returns the parameter values for a given GID 
+        Returns the parameter values for a given GID
         (Used later to update the cube)
-        
+
         Parameters
         ----------
         thisgid:   string
         identification number of the spectrum
-        
+
         Returns
         -------
         thisgt, thisgm, thissf, thismt, thissa, thissr, thista:      integers
-        indices of the parameter values for the given spectrum, 
+        indices of the parameter values for the given spectrum,
         in the multidimensional photometry cube
         """
         ind_gid = np.where(self.plan['gid'] == thisgid)
@@ -151,16 +151,16 @@ class SpecDG:
         thissr = self.plan['sfr'][ind_gid[0][0]]      # Star formation rate
         thista = self.plan['tau'][ind_gid[0][0]]      # Optical depth
         return thisgt, thisgm, thissf, thismt, thissa, thissr, thista
-    
+
     def specGet(self, filename):
         """
         Save a spectrum from the filename
-        
+
         Parameters
         ----------
         filename:   string
         absolute path to the spectrum you want to read
-        
+
         Returns
         -------
         (self.)seds:   list
@@ -170,15 +170,15 @@ class SpecDG:
         """
         # Read the fits file
         hdulist = fits.open(filename)
-        scidata = hdulist[1].data   
+        scidata = hdulist[1].data
         self.seds.append(scidata['Flux'])
         self.waves = scidata['Wavelength']
-        
+
     def specPlot(self, ind=-1):
         """
-        Plot SEDs, either giving a specific index of which if more that 
+        Plot SEDs, either giving a specific index of which if more that
         one saved, or all of them
-        
+
         Parameters
         ----------
         ind:   integer(s)   (Optional)
@@ -190,7 +190,7 @@ class SpecDG:
         plt.xlabel('Wavelength  [$\mu m$]', fontsize=15)
         if ind == -1:
             print('Plotting all SEDs in object')
-            for i in range(len(self.seds)): 
+            for i in range(len(self.seds)):
                 plt.plot(self.waves, self.seds[i])
         else:
             for i in ind: plt.plot(self.waves, np.array(self.seds[ind]))
@@ -201,21 +201,21 @@ class SpecDG:
     def spec2Phot(self, trans_curve, trans_waves, wave0, energy=1):
         """
         Compute the new photometry
-        
+
         Parameters
         ----------
         trans_curve:   array
         transmission curve of the new filter /!\ Alread read, as an array
-        
+
         trans_waves:   array
         wavelengths of the new filter
-        
+
         wave0:   float
         center/effective wavelength of the new filter
-        
+
         energy:   integer   (Optional)
         specification for integration with energy(=1, default) or photons
-        
+
         Returns
         -------
         newcube:   array(3, 6, 2, 5, 50, 29, 25) (float)
@@ -238,33 +238,33 @@ class SpecDG:
             scidata = hdu[1].data
             spec = scidata['Flux']                  # SED
             # Wavelength (same for all files)
-            if i == 0: 
-                dgwave = scidata['Wavelength']   
+            if i == 0:
+                dgwave = scidata['Wavelength']
             # Interpolate the spectral response on DG wavelength grid
             # Do it in log space
-            func = interpolate.interp1d(trans_waves, np.log10(trans_curve), 
+            func = interpolate.interp1d(trans_waves, np.log10(trans_curve),
                                         kind='slinear')
-            tr_ind = np.where( (dgwave > np.min(trans_waves)) 
+            tr_ind = np.where( (dgwave > np.min(trans_waves))
                                & (dgwave < np.max(trans_waves)))
             newtran = func(dgwave[tr_ind])
             newtran = 10**newtran
             # Frequencies
             nu0 = light_speed/wave0#[indf]
             nu = light_speed/dgwave[tr_ind]
-            # Total response curve, for integration      (Used simps) 
+            # Total response curve, for integration      (Used simps)
             if energy == 1:
                 tot_resp_curve = simps(newtran*nu0/nu, dgwave[tr_ind])
-                tmp_phot = simps(spec[tr_ind]*newtran, dgwave[tr_ind]) 
+                tmp_phot = simps(spec[tr_ind]*newtran, dgwave[tr_ind])
                 newphot = tmp_phot / tot_resp_curve
             else:      # In photons. Do the Blackbody too?
                 tot_resp_curve = simps(newtran*nu0/nu**2, dgwave[tr_ind])
-                tmp_phot = simps(spec[tr_ind]*newtran/nu, dgwave[tr_ind]) 
+                tmp_phot = simps(spec[tr_ind]*newtran/nu, dgwave[tr_ind])
                 newphot = tmp_phot / tot_resp_curve
-            # Fill the array 
+            # Fill the array
             curgt, curgm, cursf, curmt, cursa, cursr, curta = \
                 self.findParamsFromGid(self.plan['gid'][i])
             indgt, indgm, indsf, indmt, indsa, indsr, indta = \
-                phtemp.findIndexFromParams(curgt, curgm, cursf, curmt, 
+                phtemp.findIndexFromParams(curgt, curgm, cursf, curmt,
                                            cursa, cursr, curta)
             newcube[indgt, indgm, indsf, indmt, indsa, indsr, indta] = newphot
 
@@ -272,9 +272,9 @@ class SpecDG:
         #ToDo: maybe save sometimes to avoid all recompute if fails somewhere?
 
 ##########
-   
-      
-      
-      
+
+
+
+
 
 

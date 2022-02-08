@@ -16,7 +16,7 @@ class PhotDG:
     Returns
     -------
         (self.)seds: a list that grows with the SED you choose to extract
-        (self.)dgrid: the HDF5 file:  with attributes corresponding to the 
+        (self.)dgrid: the HDF5 file:  with attributes corresponding to the
                 parameters values; with each dataset corresponding to each band
 
     """
@@ -54,7 +54,7 @@ class PhotDG:
               + str(self.dgrid.attrs['sfr'][0]) + ' to '
               + str(self.dgrid.attrs['sfr'][-1])
               + ' [Solar mass] ('
-              + str(len(self.dgrid.attrs['sfr'])) + ' values)')  
+              + str(len(self.dgrid.attrs['sfr'])) + ' values)')
         print(r'       /!\ 5e-11 factor if Star formation type is Continuous [Solar mass / year]')
         print('    - Optical depth: '
               + str(self.dgrid.attrs['tau'][0]) + ' to '
@@ -62,15 +62,15 @@ class PhotDG:
               + ' (' + str(len(self.dgrid.attrs['tau'])) + ' values)')
         print(' -- Bands available')
         print(str(self.dgrid.attrs['band']))
-   
+
     def photGet(self, grain, geom, sf_type, metal, age, sfr, tau, bands=-1):
         """
-        Save photometry points given a set of parameters. The function allows 
+        Save photometry points given a set of parameters. The function allows
         for:
-           - values not in the DGrid parameter sampling, and finds the 
+           - values not in the DGrid parameter sampling, and finds the
              closest point
            - specific bands only
-    
+
         Parameters
         ----------
         grain: string
@@ -80,31 +80,31 @@ class PhotDG:
          geometry
 
         sf_type: string
-            star formation type 
+            star formation type
 
         metal: float
             metallicity
-  
+
         age: float
             age of the stellar population
-  
+
         sfr: float
             star formation rate
- 
+
         tau:  float
             optical depth
- 
+
         Returns
         -------
         seds: save the corresponding SED
 
         """
-  
+
         tmpsed = []
         # grain
         #In case the whole name is not known
-        fd_grain = [s for s in self.dgrid.attrs['grain'] 
-                    if grain.encode() in s] 
+        fd_grain = [s for s in self.dgrid.attrs['grain']
+                    if grain.encode() in s]
         w_grain = np.where(fd_grain == self.dgrid.attrs['grain'])
         ind_grain = w_grain[0][0]
         # geometry
@@ -144,8 +144,8 @@ class PhotDG:
 
     def photPlot(self, ind=-1):
         """
-        Plot photometry points, either giving a specific set of bands, or all 
-           of them either giving a specific index of which if more that 
+        Plot photometry points, either giving a specific set of bands, or all
+           of them either giving a specific index of which if more that
            one saved, or all of them
 
         Parameters
@@ -170,15 +170,15 @@ class PhotDG:
         else:
             #print 'Plotting just one'
             for i in ind:
-                plt.scatter(self.dgrid.attrs['effwaves'], 
+                plt.scatter(self.dgrid.attrs['effwaves'],
                             self.dgrid.attrs['effwaves']*np.array(self.seds[i]))
         plt.show()
- 
+
     def findIndexFromParams(self, grain, geom, sf_type, metal, age, sfr, tau):
         """
-        Give a set of parameters and find where they will be stored in the 
+        Give a set of parameters and find where they will be stored in the
         DirtyGrid cube
- 
+
         Parameters
         ----------
         grain: string
@@ -186,29 +186,29 @@ class PhotDG:
 
         geom: string
            geometry
-        
+
         sf_type: string
-           star formation type 
+           star formation type
 
         metal: float
             metallicity
-  
+
         age: float
             age of the stellar population
-  
+
         sfr: float
             star formation rate
-  
+
         tau:  float
             optical depth
-        
+
         Returns
         -------
         indgt, indgm, indst, indmt, indsa, indsr, indta: integers
            the corresponding indices
 
         """
-        
+
         indgt = np.where(self.dgrid.attrs['grain'] == grain)
         indgm = np.where(self.dgrid.attrs['geom'] == geom)
         indst = np.where(self.dgrid.attrs['sf_type'] == sf_type)
@@ -218,20 +218,20 @@ class PhotDG:
         indta = np.where(self.dgrid.attrs['tau'] == tau)
         return indgt, indgm, indst, indmt, indsa, indsr, indta
 
- 
+
     def photAddNew(self, wave0, band_name, newcube,
                    datafile='data/dirtygrid_29mar17.hdf5'):
         """
         Create the new dataset and add it to the file
-  
+
         Parameters
         ----------
         wave0: float
             central wavelength of the new filter
-     
+
         band_name: string
             name of the new filter
-  
+
         newcube: array(3, 6, 2, 5, 50, 29, 25) (float)
            new photometry to be added to the file as a new dataset
         """
@@ -249,5 +249,5 @@ class PhotDG:
         fnew[band_name] = newcube
         fnew.flush()
         fnew.close()
- 
+
 
