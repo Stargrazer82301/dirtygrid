@@ -73,6 +73,7 @@ class PhotDG:
            - values not in the DGrid parameter sampling, and finds the
              closest point
            - specific bands only
+          eg: photGet('RV31_BC6-WD01','cloudy','burst',0.1,1.0,1000000.0,0.1)
 
         Parameters
         ----------
