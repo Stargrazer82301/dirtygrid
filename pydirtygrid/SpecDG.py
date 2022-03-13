@@ -200,8 +200,8 @@ class SpecDG:
         # ToDo: need a legend
         # ToDo: specify an figure/subplot if desired?
         plt.show()
-   
-    def spec2Phot(self, trans_curve, trans_waves, wave0, energy=1):
+
+    def spec2Phot(self, trans_curve, trans_waves, wave0, energy=1, custom_photfile=False):
         """
         Compute the new photometry
 
@@ -225,7 +225,10 @@ class SpecDG:
         new photometry cube
         """
         # Create an instance of the PhotDG class to call functions
-        phtemp = PhotDG(silent=1)   
+        if not custom_photfile:
+            phtemp = PhotDG()
+        else:
+            phtemp = PhotDG(datafile=custom_photfile)
         light_speed = 2.998e14      # microns/s
         n_files = len(self.plan['gid'])
         # Create the array to fill
