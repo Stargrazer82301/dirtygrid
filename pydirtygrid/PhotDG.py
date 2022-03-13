@@ -21,12 +21,15 @@ class PhotDG:
 
     """
 
-    def __init__(self, datafile='data/dirtygrid_29mar17.hdf5'):
-        f = h5py.File(datafile, "r+")
-        # Create the objects
+    def __init__(self, datafile='/astro/dust_kg/cclark/Hubble_DIRTYGrid/dirtygrid_29mar17.hdf5',
+                 swmr=True):
+        # Create the objects (loading for Single-Write Multiple-Read if requested)
+        if not swmr:
+            f = h5py.File(datafile, "r+")
+        elif swmr:
+            f = h5py.File(datafile, "r", libver="latest", swmr=True)
         self.seds = []
         self.dgrid = f
-
         # convert binary strings to regular strings
         # does not work, need to find the way to do this...
         #self.dgrid.attrs['grain'] = [str(a)
@@ -235,10 +238,9 @@ class PhotDG:
         newcube: array(3, 6, 2, 5, 50, 29, 25) (float)
            new photometry to be added to the file as a new dataset
         """
-
-        fnew = h5py.File(datafile, "r+")
+        fnew = h5py.File(datafile, "r+", libver="latest", swmr=True)
         # Update the nominal wavelengths
-        oldwaves = f.attrs['effwaves'].tolist()
+        oldwaves = fnew.attrs['effwaves'].tolist()
         oldwaves.append(wave0)
         fnew.attrs['effwaves'] = oldwaves
         # Update the attribute
