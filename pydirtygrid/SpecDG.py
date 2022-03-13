@@ -54,7 +54,8 @@ class SpecDG:
        """
 
        alphab = []
-       for i in range(26): alphab.append(st.uppercase[i])
+       for i in range(26):
+           alphab.append(st.ascii_uppercase[i])
        alphab = np.array(alphab)
        ind_id = []
        for i in range(len(file_id)):
@@ -69,8 +70,10 @@ class SpecDG:
        files = []
        proc = subprocess.Popen(['ls', filepath], stdout=subprocess.PIPE)
        for line in proc.stdout.readlines(): files.append(line.rstrip())
-       filename = [s for s in files if file_id in s]
-       if len(filename) == 0: 
+       filename = [s.decode('utf-8') for s in files if file_id in s.decode('utf-8')]
+       if filename[-3:] == 'eps':
+           filename = filename[:-3] + 'fits'
+       if len(filename) == 0:
            return 'Void'
        else:
            filename = filename[0]
@@ -232,9 +235,14 @@ class SpecDG:
             if (i % 1000) == 0: 
                 print(i)
             filename = self.findFile(self.plan['gid'][i])
-            if filename == 'Void': 
+            if filename == 'Void':
                 continue
-            hdu = fits.open(filename)
+            if filename[-3:] == 'eps':
+                filename = filename[:-3] + 'fits'
+            try:
+                hdu = fits.open(filename)
+            except:
+                print('Could not open file '+filename)
             scidata = hdu[1].data
             spec = scidata['Flux']                  # SED
             # Wavelength (same for all files)
