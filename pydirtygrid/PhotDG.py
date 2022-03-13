@@ -209,9 +209,9 @@ class PhotDG:
 
         """
 
-        indgt = np.where(self.dgrid.attrs['grain'] == grain)
-        indgm = np.where(self.dgrid.attrs['geom'] == geom)
-        indst = np.where(self.dgrid.attrs['sf_type'] == sf_type)
+        indgt = np.where(self.dgrid.attrs['grain'].astype(str) == grain)
+        indgm = np.where(self.dgrid.attrs['geom'].astype(str) == geom)
+        indst = np.where(self.dgrid.attrs['sf_type'].astype(str) == sf_type)
         indmt = np.where(self.dgrid.attrs['metal'] == metal)
         indsa = np.where(self.dgrid.attrs['age'] == age)
         indsr = np.where(self.dgrid.attrs['sfr'] == sfr)
